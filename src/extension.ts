@@ -29,42 +29,6 @@ const GIF_FILES = [
 export function activate(context: vscode.ExtensionContext) {
 	let gifPanel: vscode.WebviewPanel | undefined;
 
-	const disposable = vscode.commands.registerCommand('meme-error.generateMemeError', async () => {
-		const categories = [
-			{ label: 'Build', detail: 'Compilation and CI failures' },
-			{ label: 'Runtime', detail: 'Crashes and execution issues' },
-			{ label: 'Network', detail: 'Timeouts and unreachable services' },
-			{ label: 'Database', detail: 'Query and migration errors' }
-		];
-
-		const selected = await vscode.window.showQuickPick(categories, {
-			placeHolder: 'Pick an error category'
-		});
-
-		if (!selected) {
-			return;
-		}
-
-		const contextInput = await vscode.window.showInputBox({
-			prompt: 'Optional: add short context (service, endpoint, file, etc.)',
-			placeHolder: 'orders-api /login src/app.ts:42'
-		});
-
-		const memeError = createMemeErrorMessage(selected.label, contextInput);
-		const editor = vscode.window.activeTextEditor;
-
-		if (editor) {
-			await editor.edit((editBuilder) => {
-				editBuilder.insert(editor.selection.active, memeError);
-			});
-			void vscode.window.showInformationMessage('Meme error inserted at cursor.');
-			return;
-		}
-
-		await vscode.env.clipboard.writeText(memeError);
-		void vscode.window.showInformationMessage('No active editor. Meme error copied to clipboard.');
-	});
-
 	const selectModeDisposable = vscode.commands.registerCommand('meme-error.selectOutputMode', async () => {
 		await promptAndSaveModeSelection(context, true);
 	});
@@ -103,7 +67,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	void promptAndSaveModeSelection(context, false);
 
-	context.subscriptions.push(disposable);
 	context.subscriptions.push(selectModeDisposable);
 	context.subscriptions.push(terminalExecutionDisposable);
 }
@@ -251,36 +214,6 @@ function playAudioInBackground(audioPath: string): boolean {
 	});
 	child.unref();
 	return true;
-}
-
-export function createMemeErrorMessage(category: string, context?: string): string {
-	const templates: Record<string, string[]> = {
-		Build: [
-			'Build failed: TypeScript says "absolutely not" to your last commit.',
-			'CI pipeline stopped. Your semicolon took a personal day.',
-			'Webpack bundled everything except success.'
-		],
-		Runtime: [
-			'Runtime error: app entered witness protection mode.',
-			'Unhandled exception: code chose chaos over logic.',
-			'Process crashed politely, then left no stack trace.'
-		],
-		Network: [
-			'Network timeout: packet is still on a spiritual journey.',
-			'Request failed: server responded with pure silence.',
-			'Connection dropped: internet blinked and forgot us.'
-		],
-		Database: [
-			'Database error: query went in, regrets came out.',
-			'Migration failed: schema evolution rejected by natural selection.',
-			'DB connection lost: credentials and reality disagree.'
-		]
-	};
-
-	const options = templates[category] ?? ['Unknown error: vibes are unstable.'];
-	const line = options[Math.floor(Math.random() * options.length)];
-	const extra = context?.trim() ? ` Context: ${context.trim()}.` : '';
-	return `[${category}] ${line}${extra}\n`;
 }
 
 export function deactivate() {}

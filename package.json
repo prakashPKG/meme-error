@@ -20,11 +20,6 @@
   "contributes": {
     "commands": [
       {
-        "command": "meme-error.generateMemeError",
-        "title": "Generate Meme Error Message",
-        "category": "Meme Error"
-      },
-      {
         "command": "meme-error.selectOutputMode",
         "title": "Select Error Output Mode",
         "category": "Meme Error"
