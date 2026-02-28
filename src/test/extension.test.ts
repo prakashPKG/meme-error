@@ -1,15 +1,25 @@
 import * as assert from 'assert';
 
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
 import * as vscode from 'vscode';
-// import * as myExtension from '../../extension';
+import { createMemeErrorMessage, getRandomDiagnosticErrorMessage } from '../extension';
 
 suite('Extension Test Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
-	test('Sample test', () => {
-		assert.strictEqual(-1, [1, 2, 3].indexOf(5));
-		assert.strictEqual(-1, [1, 2, 3].indexOf(0));
+	test('createMemeErrorMessage includes category and context', () => {
+		const message = createMemeErrorMessage('Build', 'src/app.ts:42');
+		assert.ok(message.includes('[Build]'));
+		assert.ok(message.includes('Context: src/app.ts:42.'));
+	});
+
+	test('createMemeErrorMessage falls back for unknown category', () => {
+		const message = createMemeErrorMessage('UnknownCategory');
+		assert.ok(message.includes('[UnknownCategory]'));
+		assert.ok(message.includes('Unknown error: vibes are unstable.'));
+	});
+
+	test('getRandomDiagnosticErrorMessage picks deterministic first item', () => {
+		const message = getRandomDiagnosticErrorMessage(() => 0);
+		assert.strictEqual(message, 'Code broke again. The bugs are unionized now.');
 	});
 });

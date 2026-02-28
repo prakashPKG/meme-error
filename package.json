@@ -13,15 +13,38 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "meme-error.helloWorld",
-        "title": "Hello World pk"
+        "command": "meme-error.generateMemeError",
+        "title": "Generate Meme Error Message",
+        "category": "Meme Error"
+      },
+      {
+        "command": "meme-error.selectOutputMode",
+        "title": "Select Error Output Mode",
+        "category": "Meme Error"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Meme Error",
+      "properties": {
+        "meme-error.outputMode": {
+          "type": "string",
+          "enum": [
+            "text",
+            "audio",
+            "gif"
+          ],
+          "default": "text",
+          "description": "Choose how meme-error reacts when code diagnostics report an error."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
