@@ -1,0 +1,62 @@
+{
+  "name": "meme-error",
+  "displayName": "meme-error",
+  "description": "You might see different kinds of error responses",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/prakashPKG/meme-error.git"
+  },
+  "engines": {
+    "vscode": "^1.109.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "meme-error.selectOutputMode",
+        "title": "Select Error Output Mode",
+        "category": "Meme Error"
+      }
+    ],
+    "configuration": {
+      "title": "Meme Error",
+      "properties": {
+        "meme-error.outputMode": {
+          "type": "string",
+          "enum": [
+            "text",
+            "audio",
+            "gif"
+          ],
+          "default": "text",
+          "description": "Choose how meme-error reacts when code diagnostics report an error."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.109.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "typescript-eslint": "^8.54.0",
+    "eslint": "^9.39.2",
+    "typescript": "^5.9.3",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2"
+  }
+}
