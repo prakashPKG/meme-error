@@ -43,9 +43,20 @@ All notable changes to the `meme-error` extension are documented in this file.
   - `very-infectious-laughter.wav`
   - `wait-a-minute-who-are-you.wav`
   - `yeah-boy.wav`
+- Expanded text mode with a much larger pool of witty, funny, and sarcastic developer-focused messages.
 - Updated media layout:
   - audio files moved to `media/audio/`
   - GIF files moved to `media/gif/`
+- Updated random GIF selection to the current `media/gif/` set:
+  - `chat-pouce.gif`
+  - `crying-cat-blink.gif`
+  - `gog-the-alien-dog-gog-the-alien.gif`
+  - `joks.gif`
+  - `laughing-cat.gif`
+  - `monkey-laught.gif`
+  - `sad-vince.gif`
+  - `shrek-rizz-shrek-meme.gif`
+  - `yapapa-cat.gif`
 - Added one-click VSIX packaging task (`Package VSIX`) via VS Code Tasks.
 - Added marketplace metadata and publishing quality improvements:
   - updated publisher id

@@ -93,9 +93,15 @@ const AUDIO_FILES = [
 ];
 
 const GIF_FILES = [
-	'gif/gif-1.gif',
-	'gif/gif-2.gif',
-	'gif/gif-3.gif'
+	'gif/chat-pouce.gif',
+	'gif/crying-cat-blink.gif',
+	'gif/gog-the-alien-dog-gog-the-alien.gif',
+	'gif/joks.gif',
+	'gif/laughing-cat.gif',
+	'gif/monkey-laught.gif',
+	'gif/sad-vince.gif',
+	'gif/shrek-rizz-shrek-meme.gif',
+	'gif/yapapa-cat.gif'
 ];
 
 export function activate(context: vscode.ExtensionContext) {
