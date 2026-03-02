@@ -19,6 +19,13 @@
 			"presentation": {
 				"reveal": "never"
 			}
+		},
+		{
+			"label": "Package VSIX",
+			"type": "npm",
+			"script": "package:vsix",
+			"group": "build",
+			"problemMatcher": []
 		}
 	]
 }

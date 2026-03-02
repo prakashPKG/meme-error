@@ -2,8 +2,8 @@
   "name": "meme-error",
   "displayName": "meme-error",
   "description": "You might see different kinds of error responses",
-  "publisher": "prakashPKG",
-  "version": "0.0.1",
+  "publisher": "prakash-kumar-pkg",
+  "version": "0.0.2",
   "license": "MIT",
   "icon": "assets/meme-error-icon.png",
   "homepage": "https://github.com/prakashPKG/meme-error",
@@ -58,6 +58,7 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
+    "package:vsix": "npx @vscode/vsce package",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
     "test": "vscode-test"

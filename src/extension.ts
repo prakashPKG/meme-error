@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { spawn } from 'child_process';
+import { spawn, spawnSync } from 'child_process';
 import { existsSync } from 'fs';
 
 type OutputMode = 'text' | 'audio' | 'gif';
@@ -12,18 +12,96 @@ const DIAGNOSTIC_ERROR_MESSAGES = [
 	'Undefined variable spotted. The compiler is judging silently.',
 	'Error found. Your code and reality are in different branches.',
 	'Exception energy detected. Please offer a semicolon sacrifice.',
+	'Your hotfix introduced three new features: panic, confusion, and rollback.',
+	'Stack trace says your code took a shortcut through a minefield.',
+	'The code compiled, but only emotionally. Runtime disagrees.',
+	'Your function returned chaos with a side of technical debt.',
+	'Debugger opened the file and immediately asked for paid leave.',
+	'You shipped confidence to production, not correctness.',
+	'This bug is not a bug anymore. It is part of team leadership.',
+	'Your refactor removed complexity by moving it to everyone else.',
+	'Even the linter stopped complaining and started laughing.',
+	'Production called. It wants a restraining order against this commit.',
+	'Your code review was approved by hope, not by humans.',
+	'This commit has strong \"works on my machine\" energy and zero evidence.',
+	'Your variable names read like a password reset attempt.',
+	'You turned edge cases into the main feature.',
+	'The CPU is working hard just to misunderstand your intent.',
+	'Unit tests passed because they were too scared to fail.',
+	'Your rollback plan is currently \"close laptop and relocate.\"',
+	'This code is a distributed denial-of-service attack on maintainability.',
+	'Your branch strategy is \"merge and pray.\"',
+	'The bug tracker just filed a complaint against your coding style.',
+	'Your dependency graph now qualifies as abstract art.',
+	'You optimized the wrong thing with impressive confidence.',
+	'This error is just your architecture giving live feedback.',
+	'Your code has excellent job security for future developers.',
+	'The runtime saw your commit and chose violence.',
+	'You solved one bug and promoted four interns to critical incidents.',
+	'This line should come with a warning label and legal disclaimer.',
+	'Your fix was so temporary it expired before deployment.',
+	'If confusion were a framework, you just shipped v2.0.',
+	'You wrote clean code in spirit. Syntax had other plans.',
+	'Your app is now event-driven by pure panic.',
+	'This feature is held together by comments and courage.',
+	'Your exception handling strategy is \"manifest destiny.\"',
+	'You achieved full-stack failure with admirable consistency.',
+	'The compiler understood your code. It just did not respect it.',
+	'Your architecture diagram is now legally classified as fiction.',
+	'This release has all the stability of a Jenga tower in an earthquake.',
+	'You did not break production. You redecorated its ruins.',
+	'This bug reproduces faster than your sprint velocity.',
+	'Your log messages are poetry, unfortunately written in riddles.',
+	'Your API contract is now a verbal agreement with no witnesses.',
+	'The debugger found your bug and requested hazard pay.',
+	'Your code is technically running, morally questionable, spiritually lost.',
+	'This stack trace is basically your autobiography.',
 	'Build gods are unhappy. Try snacks and a restart.'
 ];
 
 const AUDIO_FILES = [
-	'Tom_Laughing.wav',
-	'Brahmanandam_Laugh.wav'
+	'audio/aa-with-reverb.wav',
+	'audio/aayein-meme.wav',
+	'audio/Bhai Yaha Pe Kya Ho Raha Hai.wav',
+	'audio/Brahmanandam_Laugh.wav',
+	'audio/bruh-sound.wav',
+	'audio/bulla.wav',
+	'audio/faaa.wav',
+	'audio/fart-4.wav',
+	'audio/fart-5.wav',
+	'audio/indian-donkay-songa.wav',
+	'audio/indian-guy-laughing.wav',
+	'audio/indian-guy-singing.wav',
+	'audio/indian-sorry.wav',
+	'audio/jaldi_waha_se_hato.wav',
+	'audio/kya-cheda-bhosdi.wav',
+	'audio/laughing-man.wav',
+	'audio/maa-ka-bhosda-aag.wav',
+	'audio/mmm-mremememew-memew-indian.wav',
+	'audio/modi-ji-bhojyam.wav',
+	'audio/modi-ji-bkl.wav',
+	'audio/mummy-re.wav',
+	'audio/oh-my-god.wav',
+	'audio/scammer-wtf-are-you-doing-joker.wav',
+	'audio/sinister-laugh.wav',
+	'audio/Speaking Italian.wav',
+	'audio/thud-sound.wav',
+	'audio/Tom_Laughing.wav',
+	'audio/very-infectious-laughter.wav',
+	'audio/wait-a-minute-who-are-you.wav',
+	'audio/yeah-boy.wav'
 ];
 
 const GIF_FILES = [
-	'gif-1.gif',
-	'gif-2.gif',
-	'gif-3.gif'
+	'gif/chat-pouce.gif',
+	'gif/crying-cat-blink.gif',
+	'gif/gog-the-alien-dog-gog-the-alien.gif',
+	'gif/joks.gif',
+	'gif/laughing-cat.gif',
+	'gif/monkey-laught.gif',
+	'gif/sad-vince.gif',
+	'gif/shrek-rizz-shrek-meme.gif',
+	'gif/yapapa-cat.gif'
 ];
 
 export function activate(context: vscode.ExtensionContext) {
@@ -46,7 +124,10 @@ export function activate(context: vscode.ExtensionContext) {
 					vscode.ViewColumn.Beside,
 					{
 						enableScripts: true,
-						localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'media')]
+						localResourceRoots: [
+							vscode.Uri.joinPath(context.extensionUri, 'media'),
+							vscode.Uri.joinPath(context.extensionUri, 'media', 'gif')
+						]
 					}
 				);
 
@@ -135,7 +216,7 @@ async function showModeBasedError(
 		}
 		const played = playAudioInBackground(audioPath);
 		if (!played) {
-			void vscode.window.showWarningMessage('Audio mode is supported on Windows only. Falling back to popup.');
+			void vscode.window.showWarningMessage('No supported system audio player found. Falling back to popup.');
 			const memeMessage = getRandomDiagnosticErrorMessage();
 			void vscode.window.showErrorMessage(memeMessage, { modal: true });
 		}
@@ -202,18 +283,65 @@ function buildGifHtml(cspSource: string, gifUrl: string): string {
 }
 
 function playAudioInBackground(audioPath: string): boolean {
-	if (process.platform !== 'win32') {
-		return false;
+	if (process.platform === 'win32') {
+		const escapedPath = audioPath.replaceAll("'", "''");
+		const command = `(New-Object System.Media.SoundPlayer '${escapedPath}').PlaySync()`;
+		const child = spawn('powershell', ['-NoProfile', '-NonInteractive', '-Command', command], {
+			windowsHide: true,
+			stdio: 'ignore'
+		});
+		child.unref();
+		return true;
 	}
 
-	const escapedPath = audioPath.replaceAll("'", "''");
-	const command = `(New-Object System.Media.SoundPlayer '${escapedPath}').PlaySync()`;
-	const child = spawn('powershell', ['-NoProfile', '-NonInteractive', '-Command', command], {
-		windowsHide: true,
-		stdio: 'ignore'
-	});
-	child.unref();
-	return true;
+	if (process.platform === 'darwin') {
+		if (!hasCommand('afplay')) {
+			return false;
+		}
+		const child = spawn('afplay', [audioPath], {
+			detached: true,
+			stdio: 'ignore'
+		});
+		child.unref();
+		return true;
+	}
+
+	if (process.platform === 'linux') {
+		const player = getLinuxAudioPlayer();
+		if (!player) {
+			return false;
+		}
+		const escapedPath = audioPath.replaceAll("'", "'\\''");
+		const command = player === 'ffplay'
+			? `ffplay -nodisp -autoexit -loglevel quiet '${escapedPath}'`
+			: `${player} '${escapedPath}'`;
+		const child = spawn('sh', ['-c', command], {
+			detached: true,
+			stdio: 'ignore'
+		});
+		child.unref();
+		return true;
+	}
+
+	return false;
+}
+
+function hasCommand(command: string): boolean {
+	const result = spawnSync('sh', ['-c', `command -v ${command}`], { stdio: 'ignore' });
+	return result.status === 0;
+}
+
+function getLinuxAudioPlayer(): 'paplay' | 'aplay' | 'ffplay' | undefined {
+	if (hasCommand('paplay')) {
+		return 'paplay';
+	}
+	if (hasCommand('aplay')) {
+		return 'aplay';
+	}
+	if (hasCommand('ffplay')) {
+		return 'ffplay';
+	}
+	return undefined;
 }
 
 export function deactivate() {}
