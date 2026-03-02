@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { spawn } from 'child_process';
+import { spawn, spawnSync } from 'child_process';
 import { existsSync } from 'fs';
 
 type OutputMode = 'text' | 'audio' | 'gif';
@@ -16,14 +16,42 @@ const DIAGNOSTIC_ERROR_MESSAGES = [
 ];
 
 const AUDIO_FILES = [
-	'Tom_Laughing.wav',
-	'Brahmanandam_Laugh.wav'
+	'audio/aa-with-reverb.wav',
+	'audio/aayein-meme.wav',
+	'audio/Bhai Yaha Pe Kya Ho Raha Hai.wav',
+	'audio/Brahmanandam_Laugh.wav',
+	'audio/bruh-sound.wav',
+	'audio/bulla.wav',
+	'audio/faaa.wav',
+	'audio/fart-4.wav',
+	'audio/fart-5.wav',
+	'audio/indian-donkay-songa.wav',
+	'audio/indian-guy-laughing.wav',
+	'audio/indian-guy-singing.wav',
+	'audio/indian-sorry.wav',
+	'audio/jaldi_waha_se_hato.wav',
+	'audio/kya-cheda-bhosdi.wav',
+	'audio/laughing-man.wav',
+	'audio/maa-ka-bhosda-aag.wav',
+	'audio/mmm-mremememew-memew-indian.wav',
+	'audio/modi-ji-bhojyam.wav',
+	'audio/modi-ji-bkl.wav',
+	'audio/mummy-re.wav',
+	'audio/oh-my-god.wav',
+	'audio/scammer-wtf-are-you-doing-joker.wav',
+	'audio/sinister-laugh.wav',
+	'audio/Speaking Italian.wav',
+	'audio/thud-sound.wav',
+	'audio/Tom_Laughing.wav',
+	'audio/very-infectious-laughter.wav',
+	'audio/wait-a-minute-who-are-you.wav',
+	'audio/yeah-boy.wav'
 ];
 
 const GIF_FILES = [
-	'gif-1.gif',
-	'gif-2.gif',
-	'gif-3.gif'
+	'gif/gif-1.gif',
+	'gif/gif-2.gif',
+	'gif/gif-3.gif'
 ];
 
 export function activate(context: vscode.ExtensionContext) {
@@ -46,7 +74,10 @@ export function activate(context: vscode.ExtensionContext) {
 					vscode.ViewColumn.Beside,
 					{
 						enableScripts: true,
-						localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'media')]
+						localResourceRoots: [
+							vscode.Uri.joinPath(context.extensionUri, 'media'),
+							vscode.Uri.joinPath(context.extensionUri, 'media', 'gif')
+						]
 					}
 				);
 
@@ -135,7 +166,7 @@ async function showModeBasedError(
 		}
 		const played = playAudioInBackground(audioPath);
 		if (!played) {
-			void vscode.window.showWarningMessage('Audio mode is supported on Windows only. Falling back to popup.');
+			void vscode.window.showWarningMessage('No supported system audio player found. Falling back to popup.');
 			const memeMessage = getRandomDiagnosticErrorMessage();
 			void vscode.window.showErrorMessage(memeMessage, { modal: true });
 		}
@@ -202,18 +233,65 @@ function buildGifHtml(cspSource: string, gifUrl: string): string {
 }
 
 function playAudioInBackground(audioPath: string): boolean {
-	if (process.platform !== 'win32') {
-		return false;
+	if (process.platform === 'win32') {
+		const escapedPath = audioPath.replaceAll("'", "''");
+		const command = `(New-Object System.Media.SoundPlayer '${escapedPath}').PlaySync()`;
+		const child = spawn('powershell', ['-NoProfile', '-NonInteractive', '-Command', command], {
+			windowsHide: true,
+			stdio: 'ignore'
+		});
+		child.unref();
+		return true;
 	}
 
-	const escapedPath = audioPath.replaceAll("'", "''");
-	const command = `(New-Object System.Media.SoundPlayer '${escapedPath}').PlaySync()`;
-	const child = spawn('powershell', ['-NoProfile', '-NonInteractive', '-Command', command], {
-		windowsHide: true,
-		stdio: 'ignore'
-	});
-	child.unref();
-	return true;
+	if (process.platform === 'darwin') {
+		if (!hasCommand('afplay')) {
+			return false;
+		}
+		const child = spawn('afplay', [audioPath], {
+			detached: true,
+			stdio: 'ignore'
+		});
+		child.unref();
+		return true;
+	}
+
+	if (process.platform === 'linux') {
+		const player = getLinuxAudioPlayer();
+		if (!player) {
+			return false;
+		}
+		const escapedPath = audioPath.replaceAll("'", "'\\''");
+		const command = player === 'ffplay'
+			? `ffplay -nodisp -autoexit -loglevel quiet '${escapedPath}'`
+			: `${player} '${escapedPath}'`;
+		const child = spawn('sh', ['-c', command], {
+			detached: true,
+			stdio: 'ignore'
+		});
+		child.unref();
+		return true;
+	}
+
+	return false;
+}
+
+function hasCommand(command: string): boolean {
+	const result = spawnSync('sh', ['-c', `command -v ${command}`], { stdio: 'ignore' });
+	return result.status === 0;
+}
+
+function getLinuxAudioPlayer(): 'paplay' | 'aplay' | 'ffplay' | undefined {
+	if (hasCommand('paplay')) {
+		return 'paplay';
+	}
+	if (hasCommand('aplay')) {
+		return 'aplay';
+	}
+	if (hasCommand('ffplay')) {
+		return 'ffplay';
+	}
+	return undefined;
 }
 
 export function deactivate() {}

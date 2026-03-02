@@ -32,5 +32,10 @@ The extension will trigger automatically.
 
 ## Notes
 
-- Audio mode currently uses Windows playback.
+- Audio files are stored under `media/audio/`.
+- GIF files are stored under `media/gif/`.
+- Audio mode uses OS-specific playback:
+  - Windows: PowerShell `System.Media.SoundPlayer`
+  - macOS: `afplay`
+  - Linux: `paplay` / `aplay` / `ffplay` (first available)
 - GIF mode opens a webview panel with a Close button.
